@@ -41,6 +41,8 @@
             display: flex;
             gap: 8px;
             backdrop-filter: blur(5px);
+            max-width: 95vw;
+            overflow-x: auto;
         }
 
         .filter-btn {
@@ -53,6 +55,7 @@
             color: #555;
             cursor: pointer;
             transition: all 0.2s ease;
+            white-space: nowrap;
         }
 
         .filter-btn:hover {
@@ -86,7 +89,7 @@
             background: #0056b3;
         }
 
-        /* УВЕЛИЧЕННАЯ БОКОВАЯ ПАНЕЛЬ СЛЕВА */
+        /* БОКОВАЯ ПАНЕЛЬ И АДАПТИВ ДЛЯ МОБИЛЬНЫХ */
         .side-panel {
             position: absolute;
             top: 80px;
@@ -106,6 +109,19 @@
 
         .side-panel.active {
             display: block;
+        }
+
+        /* На мобильных экранах панель открывается снизу на весь экран */
+        @media (max-width: 600px) {
+            .side-panel {
+                top: auto;
+                bottom: 0;
+                left: 0;
+                width: 100vw;
+                max-height: 70vh;
+                border-radius: 20px 20px 0 0;
+                padding: 16px;
+            }
         }
 
         .close-btn {
@@ -145,6 +161,7 @@
             gap: 8px;
             margin-bottom: 14px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .popup-year {
@@ -162,7 +179,6 @@
             font-weight: 500;
         }
 
-        /* Увеличенный блок сравнения фото */
         .photo-comparison {
             display: flex;
             gap: 10px;
@@ -175,7 +191,7 @@
             border-radius: 10px;
             overflow: hidden;
             background: #e0e0e0;
-            height: 150px;
+            height: 140px;
             box-shadow: 0 3px 8px rgba(0,0,0,0.1);
         }
 
@@ -200,7 +216,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Детальные информационные секции */
         .popup-section {
             font-size: 13px;
             color: #2b2b2b;
@@ -230,6 +245,16 @@
         .popup-fact strong {
             color: #856404;
         }
+
+        .popup-history {
+            background: #e8f4f8;
+            border-left-color: #17a2b8;
+            color: #114b5f;
+        }
+
+        .popup-history strong {
+            color: #17a2b8;
+        }
     </style>
 </head>
 <body>
@@ -251,151 +276,161 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Данные точек с точными прямыми фото-архивами объектов Алматы
+        const getProxyImg = (url) => `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=500&h=350&fit=cover`;
+
         const points = [
             { 
                 id: 1, 
-                name: "Вознесенский кафедральный собор", 
-                year: "1907 г.", 
-                address: "Парк им. 28 панфиловцев",
+                name: "🏛️ Вознесенский кафедральный собор", 
+                year: "1904–1907 гг.", 
+                address: "Парк имени 28 гвардейцев-панфиловцев",
                 era: "верный", 
                 coords: [43.2588, 76.9531], 
-                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Verny_Cathedral_1910s.jpg/800px-Verny_Cathedral_1910s.jpg",
-                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Zenkov_Cathedral_Almaty.jpg/800px-Zenkov_Cathedral_Almaty.jpg",
-                context: "Шедевр деревянного зодчества высотой 56 метров, построенный инженером А. П. Зенковым полностью из дерева без металлических гвоздей. Конструкция обладает уникальной гибкостью.", 
-                fact: "В 1911 году во время катастрофического 10-балльного землетрясения собор выстоял, потеряв только крест с колокольни.",
-                source: "Государственный архив г. Алматы / Архитектурный реестр.", 
-                summary: "Главный архитектурный символ крепости и сейсмостойкости дореволюционного Верного." 
+                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/6/6b/Verny_Cathedral_1910s.jpg"),
+                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/b/b3/Zenkov_Cathedral_Almaty.jpg"),
+                purpose: "Был построен как главный православный кафедральный собор города Верного.",
+                events: "Собор стал центром религиозной и архитектурной жизни города. Его деревянная конструкция проектировалась А. П. Зенковым с особым учётом сейсмичности региона.",
+                importance: "Это один из ключевых архитектурных символов дореволюционного Верного и уникальный памятник деревянного зодчества.",
+                fact: "Собор полностью построен из тянь-шаньской ели, а уникальные инженерные решения позволили ему выстоять во время катастрофического 10-балльного Кеминского землетрясения 1911 года.",
+                chronicle: "Этот объект позволяет увидеть, каким был Алматы ещё до превращения его в советский и современный мегаполис, показывая зарождение уникальной архитектурной школы города."
             },
             { 
                 id: 2, 
-                name: "Музей народных музыкальных инструментов", 
+                name: "🏘️ Музей истории Алматы (Верненский приют)", 
                 year: "1892 г.", 
-                address: "ул. Зенкова, 24",
+                address: "Улица Кабанбай батыра, 132",
                 era: "верный", 
-                coords: [43.2515, 76.9562], 
-                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Verny_Officers_Assembly.jpg/800px-Verny_Officers_Assembly.jpg",
-                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Museum_of_National_Musical_Instruments_Almaty.jpg/800px-Museum_of_National_Musical_Instruments_Almaty.jpg",
-                context: "Здание бывшего Офицерского собрания города Верного. Возведено в «ропетовском» стиле из тянь-шанской ели с изящными деревянными резными наличниками.", 
-                fact: "Сегодня здесь хранится более 1000 редких музыкальных инструментов, включая домбры Абая и Жамбыла.",
-                source: "Историко-архитектурный атлас Верного.", 
-                summary: "Уникальный памятник деревянной застройки конца XIX века и центр культурного наследия." 
+                coords: [43.2515, 76.9315], 
+                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/8/82/Verny_Officers_Assembly.jpg"),
+                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/a/a2/Museum_of_National_Musical_Instruments_Almaty.jpg"),
+                purpose: "Здание возводилось для размещения Верненского детского приюта и социальных служб города.",
+                events: "В конце XIX века здесь воспитывались и обучались дети-сироты. В советские и последующие годы назначение здания менялось, пока в нем не открылся городской музей.",
+                importance: "Выдающийся образец деревянного зодчества конца XIX века, спроектированный архитектором Павлом Гурдэ.",
+                fact: "Это одно из самых старых сохранившихся общественных зданий Алматы, где сейчас хранятся уникальные экспонаты об истории города от древности до наших дней.",
+                chronicle: "Показывает, как в конце XIX века развивалась социальная и образовательная инфраструктура молодого города Верного."
             },
             { 
                 id: 3, 
-                name: "Зелёный базар (Гостиный двор)", 
-                year: "1875 г.", 
-                address: "ул. Жибек Жолы, 53",
+                name: "🛍️ Зелёный базар", 
+                year: "1875 г. / 1975 г.", 
+                address: "Перекрёсток улиц Жибек Жолы и Пушкина",
                 era: "верный", 
                 coords: [43.2641, 76.9548], 
-                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Gostiny_dvor_Verny.jpg/800px-Gostiny_dvor_Verny.jpg",
-                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Green_Bazaar_Almaty.jpg/800px-Green_Bazaar_Almaty.jpg",
-                context: "Собрание купеческих лавок и торговых рядов. В 1970-х годах комплекс полностью перестроили в стиле советского брутализма с крытыми павильонами.", 
-                fact: "На этом месте непрерывно ведется торговля уже более 150 лет.",
-                source: "Купеческие гильдейские книги Верненского уезда.", 
-                summary: "Историческое и экономическое «сердце» города со времён Великого Шелкового пути." 
+                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/1/1a/Gostiny_dvor_Verny.jpg"),
+                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/3/30/Green_Bazaar_Almaty.jpg"),
+                purpose: "Создавался как главный торговый и экономический узел города для местной торговли и приезжих купцов.",
+                events: "На протяжении полутора веков место эволюционировало от купеческих лавок и ярмарочных рядов до масштабного крытого базара в стиле советского модернизма.",
+                importance: "Главное торговое сердце города, отражающее колорит, культуру и экономику Алматы на всех этапах его развития.",
+                fact: "В XIX веке базар назывался Гостиным двором, а современный крытый павильон 1970-х годов был спроектирован с учетом сложных сейсмических норм и особого распределения прилавков.",
+                chronicle: "Демонстрирует преемственность торговых традиций и экономическое развитие города — от Верненского купечества до современной торговли."
             },
             { 
                 id: 4, 
-                name: "Станция Алматы-1", 
-                year: "1927 г.", 
-                address: "ул. Станционная, 1",
+                name: "🚂 Железнодорожная станция Алматы-1", 
+                year: "1927–1929 гг.", 
+                address: "Улица Рихарда Зорге, 1",
                 era: "xx", 
                 coords: [43.3412, 76.9485], 
-                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Turksib_1930.jpg/800px-Turksib_1930.jpg",
-                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Almaty_1_train_station.jpg/800px-Almaty_1_train_station.jpg",
-                context: "Строительство Туркестано-Сибирской магистрали (Турксиб) связало Казахстан с общесоюзной транспортной сетью и ускорило индустриализацию.", 
-                fact: "Именно благодаря прокладке Турксиба было принято решение перенести столицу КазССР из Кызылорды в Алма-Ату.",
-                source: "Летопись Турксиба (1927–1931 гг.).", 
-                summary: "Градообразующий объект, превративший провинциальный город в крупнейший мегаполис." 
+                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/e/e0/Turksib_1930.jpg"),
+                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/d/d4/Almaty_1_train_station.jpg"),
+                purpose: "Строилась как ключевой транспортный узел легендарной магистрали Турксиб (Туркестано-Сибирская железная дорога).",
+                events: "Прибытие первого поезда соединило изолированный регион с железными дорогами всей страны, вызвав демографический и экономический бум.",
+                importance: "Связующее звено, которое превратило провинциальный город в крупнейший промышленный и транспортный центр.",
+                fact: "Именно запуск Турксиба и станции Алматы-1 стали решающим фактором для переноса столицы Казахской АССР из Кызылорды в Алма-Ату в 1929 году.",
+                chronicle: "Иллюстрирует переломный этап превращения тихого Верного в динамичный транспортный и индустриальный центр начала XX века."
             },
             { 
                 id: 5, 
-                name: "Парк имени 28 героев-панфиловцев", 
-                year: "1975 г.", 
-                address: "Центральный мемориальный парк",
+                name: "🌳 Парк имени 28 гвардейцев-панфиловцев", 
+                year: "1870-е гг. / 1975 г.", 
+                address: "Квадрат улиц Гоголя, Зенкова, Казыбек би, Кунаева",
                 era: "ссср", 
                 coords: [43.2592, 76.9542], 
-                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Panfilov_Park_History.jpg/800px-Panfilov_Park_History.jpg",
-                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Panfilov_Park_Almaty_Memorial.jpg/800px-Panfilov_Park_Almaty_Memorial.jpg",
-                context: "Первоначально Пушкинский сад. В 1975 году к 30-летию Победы воздвигнут величественный Мемориал Славы с Вечным огнем и бронзовым барельефом.", 
-                fact: "Парк содержит деревья, посаженные руками известных исторических личностей XX века.",
-                source: "Военно-исторический архив Министерства обороны.", 
-                summary: "Главный мемориальный комплекс и святилище памяти героев Великой Отечественной войны." 
+                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/9/91/Panfilov_Park_History.jpg"),
+                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/8/87/Panfilov_Park_Almaty_Memorial.jpg"),
+                purpose: "Первоначально — городской сад; позже — главный мемориальный комплекс в память о героях Великой Отечественной войны.",
+                events: "Парк менял названия (Старокладбищенский, Пушкинский) и постепенно сформировался как главное мемориальное пространство города с Вечным огнем.",
+                importance: "Эпицентр военной памяти города, связанный с подвигом 316-й стрелковой дивизии, сформированной в Алма-Ате и Фрунзе.",
+                fact: "Массивный горельеф Мемориала Славы изображает воинов всех союзных республик, защищавших Москву, и является одним из крупнейших бронзовых монументов в Казахстане.",
+                chronicle: "Показывает, как менялась городская память и формировалось отношение к подвигу казахстанцев в советский период."
             },
             { 
                 id: 6, 
-                name: "Дворец Республики", 
+                name: "🎭 Дворец Республики", 
                 year: "1970 г.", 
-                address: "пр. Достык, 56",
+                address: "Пересечение проспекта Достык и проспекта Абая",
                 era: "ссср", 
                 coords: [43.2435, 76.9582], 
-                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Palace_of_Lenin_Almaty_1970s.jpg/800px-Palace_of_Lenin_Almaty_1970s.jpg",
-                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Palace_of_the_Republic_Almaty.jpg/800px-Palace_of_the_Republic_Almaty.jpg",
-                context: "Здание Дворца культуры им. В. И. Ленина. Шедевр советского модернизма с мощными консольными свесами и эффектной «парящей» кровлей.", 
-                fact: "Архитекторы здания получили Государственную премию СССР за новаторский сейсмостойкий проект.",
-                source: "Сборник «Архитектура Советского Казахстана».", 
-                summary: "Главный культурно-концертный зал и визитная карточка советского архитектурного ансамбля." 
+                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/4/4e/Palace_of_Lenin_Almaty_1970s.jpg"),
+                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/3/3d/Palace_of_the_Republic_Almaty.jpg"),
+                purpose: "Построен как Дворец культуры имени В. И. Ленина для проведения масштабных концертов, съездов и государственных мероприятий.",
+                events: "Здание стало главной концертной площадкой Казахстана и важным элементом архитектурного ансамбля площади Абая.",
+                importance: "Яркий и выдающийся памятник советского модернизма в архитектуре Средней Азии.",
+                fact: "Архитекторы здания разработали «парящую» кровлю, шатер которой опирается на скрытые опоры, создавая эффект лёгкости огромного железобетонного объема.",
+                chronicle: "Отражает советский период расцвета культуры, науки и грандиозного градостроительства Алма-Аты 1970-х годов."
             },
             { 
                 id: 7, 
-                name: "Высокогорный каток Медеу", 
+                name: "🏔️ Высокогорный каток «Медеу»", 
                 year: "1972 г.", 
-                address: "урочище Медеу, 465",
+                address: "Урочище Медеу, ул. Керей-Жанибек хандар, 465",
                 era: "ссср", 
                 coords: [43.1575, 77.0588], 
-                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Medeu_1970s_construction.jpg/800px-Medeu_1970s_construction.jpg",
-                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Medeu_skating_rink.jpg/800px-Medeu_skating_rink.jpg",
-                context: "Крупнейший высокогорный спортивный комплекс в мире на высоте 1691 м над уровнем моря. Ледовое поле площадью 10,5 тыс. кв. м.", 
-                fact: "Из-за уникального разряженного воздуха и чистейшей горной воды на ледовом овале Медеу было установлено свыше 200 мировых рекордов.",
-                source: "Летопись мирового конькобежного спорта.", 
-                summary: "Легендарная «фабрика рекордов» и всемирно известный спортивный бренд страны." 
+                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/d/d7/Medeu_1970s_construction.jpg"),
+                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/8/81/Medeu_skating_rink.jpg"),
+                purpose: "Для проведения тренировок и международных соревнований по конькобежному спорту на большой высоте.",
+                events: "Каток стал ледовой ареной мирового уровня, где было установлено свыше 200 мировых рекордов.",
+                importance: "Главный спортивный бренд Алматы и уникальный инженерный объект, вписанный в горный ландшафт Заилийского Алатау.",
+                fact: "Высокогорный лед «Медеу» называют «кузницей рекордов» благодаря чистейшей ледниковой воде без минеральных примесей, используемой для заливки, и высокому разряженному воздуху.",
+                chronicle: "Раскрывает образ Алматы как уникального города у подножия гор и мирового центра зимнего спорта."
             },
             { 
                 id: 8, 
-                name: "Площадь Республики", 
+                name: "🇰🇿 Площадь Республики", 
                 year: "1980 г.", 
-                address: "пр. Достык / ул. Сатпаева",
+                address: "Пересечение проспекта Достык, ул. Сатпаева и пр. Назарбаева",
                 era: "ссср", 
                 coords: [43.2383, 76.9455], 
-                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Brezhnev_Square_Almaty_1980s.jpg/800px-Brezhnev_Square_Almaty_1980s.jpg",
-                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Republic_Square_Almaty.jpg/800px-Republic_Square_Almaty.jpg",
-                context: "Создана как новая административная площадь столицы. Здесь находился Дом Правительства и ключевые министерства КазССР.", 
-                fact: "Площадь стала эпицентром трагических и судьбоносных событий Декабря 1986 года (Желтоксан).",
-                source: "Хроники новейшей истории Казахстана.", 
-                summary: "Главная общественно-политическая арена, где формировалось стремление к независимости." 
+                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/c/c5/Brezhnev_Square_Almaty_1980s.jpg"),
+                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/7/78/Republic_Square_Almaty.jpg"),
+                purpose: "Проектировалась как Новая площадь для проведения главных государственных парадов, демонстраций и торжеств.",
+                events: "Площадь стала местом судьбоносных Декабрьских событий 1986 года (Желтоксан), а также объявления Независимости Казахстана в 1991 году.",
+                importance: "Главная общественно-политическая арена новейшей истории страны.",
+                fact: "Именно здесь проводились первые масштабные празднества Наурыза в современном Казахстане и принимались важнейшие государственные решения.",
+                chronicle: "Отражает переходный этап от советского прошлого к обретению суверенитета и началу новейшей истории Казахстана."
             },
             { 
                 id: 9, 
-                name: "Монумент Независимости", 
+                name: "🗿 Монумент Независимости", 
                 year: "1996 г.", 
-                address: "Площадь Республики",
+                address: "Центр Площади Республики",
                 era: "независимость", 
                 coords: [43.2388, 76.9458], 
-                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Construction_Monument_Independence_Almaty.jpg/800px-Construction_Monument_Independence_Almaty.jpg",
-                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Independence_Monument_Almaty.jpg/800px-Independence_Monument_Almaty.jpg",
-                context: "Стела высотой 28 метров, увенчанная фигурой «Золотого человека», стоящего на крылатом барсе. Автор скульптурного комплекса — Шота Валиханов.", 
-                fact: "У подножия стелы находится отпечаток ладони и книга с присягой, а барельефы описывают историю от Сакской эпохи до Независимости.",
-                source: "Государственный реестр памятников суверенного Казахстана.", 
-                summary: "Главный символ государственности, свободы и непрерывности истории страны." 
+                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/3/36/Construction_Monument_Independence_Almaty.jpg"),
+                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/f/f3/Independence_Monument_Almaty.jpg"),
+                purpose: "Возведен в честь 5-летия Независимости Республики Казахстан по инициативе Н. А. Назарбаева.",
+                events: "Стал центральной доминантой площади и символом новой государственной идентичности.",
+                importance: "Художественный и исторический комплекс, отображающий главные этапы казахской государственности.",
+                fact: "На вершине 28-метровой стелы установлен «Алтын Адам» (Золотой человек), управляющий крылатым барсом, а у подножия стелы находится барельеф с текстом Присяги и отпечатком ладони.",
+                chronicle: "Демонстрирует период Независимого Казахстана, формирование новой символики и осмысление национальной истории."
             },
             { 
                 id: 10, 
-                name: "Пешеходная улица Арбат (Жибек Жолы)", 
-                year: "Наши дни", 
-                address: "ул. Жибек Жолы (от Назарбаева до Абылай хана)",
+                name: "📚 Пешеходная улица Арбат (Жибек Жолы)", 
+                year: "1980-е гг. / 2017 г.", 
+                address: "Улица Жибек Жолы (от Абылай хана до Назарбаева)",
                 era: "независимость", 
                 coords: [43.2621, 76.9423], 
-                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Gorky_Street_Verny.jpg/800px-Gorky_Street_Verny.jpg",
-                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Arbat_Almaty_street.jpg/800px-Arbat_Almaty_street.jpg",
-                context: "Бывшая улица Торговая и Горького. После масштабной реконструкции преобразована в пешеходный бульвар для прогулок и творчества.", 
-                fact: "Здесь выставляют свои работы художники, выступают музыканты и проводятся городские арт-фестивали.",
-                source: "Мастер-план урбанистического развития Алматы.", 
-                summary: "Главное креативное и пешеходное пространство современного Алматы." 
+                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/6/67/Gorky_Street_Verny.jpg"),
+                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/9/91/Arbat_Almaty_street.jpg"),
+                purpose: "Создавалась как первая пешеходная и культурно-рекреационная артерия исторического центра.",
+                events: "Бывшая Торговая улица трансформировалась в открытое арт-пространство для художников, музыкантов, ремесленников и горожан.",
+                importance: "Главный показатель качества современной городской среды и центр уличной культуры Алматы.",
+                fact: "Название улицы «Жибек Жолы» переводится как «Шелковый путь», что прямо связывает современную пешеходную улицу с древнеторговыми трассами, проходившими через Жетысу.",
+                chronicle: "Показывает образ современного Алматы — комфортного, открытого мегаполиса, ориентированного на пешеходов, творчество и общественное пространство."
             }
         ];
 
-        // Инициализация карты
         const map = L.map('map', { zoomControl: false }).setView([43.25, 76.95], 12);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
@@ -417,7 +452,6 @@
             const marker = L.marker(point.coords, { icon: icon }).addTo(map);
             marker.era = point.era;
 
-            // Клик по точке -> плавная центровка и вызов большой панели
             marker.on('click', function() {
                 map.flyTo(point.coords, 15, { animate: true, duration: 1.2 });
 
@@ -434,14 +468,24 @@
                             <span class="photo-label">Раньше</span>
                         </div>
                         <div class="photo-box">
-                            <img src="${point.imgNew}" alt="Современное фото" onerror="this.src='https://via.placeholder.com/200x150?text=Фото+Алматы'">
+                            <img src="${point.imgNew}" alt="Современное фото" onerror="this.src='https://via.placeholder.com/200x150?text=Сейчас+Алматы'">
                             <span class="photo-label">Сейчас</span>
                         </div>
                     </div>
 
                     <div class="popup-section">
-                        <strong>Исторический контекст и архитектура:</strong>
-                        ${point.context}
+                        <strong>Зачем создан?</strong>
+                        ${point.purpose}
+                    </div>
+
+                    <div class="popup-section">
+                        <strong>Что происходило?</strong>
+                        ${point.events}
+                    </div>
+
+                    <div class="popup-section">
+                        <strong>Почему важен?</strong>
+                        ${point.importance}
                     </div>
 
                     <div class="popup-section popup-fact">
@@ -449,14 +493,9 @@
                         ${point.fact}
                     </div>
 
-                    <div class="popup-section">
-                        <strong>Источник данных:</strong>
-                        ${point.source}
-                    </div>
-
-                    <div class="popup-section">
-                        <strong>Исторический вывод:</strong>
-                        ${point.summary}
+                    <div class="popup-section popup-history">
+                        <strong>Для летописи:</strong>
+                        ${point.chronicle}
                     </div>
                 `;
 
