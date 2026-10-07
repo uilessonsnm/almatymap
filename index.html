@@ -111,7 +111,6 @@
             display: block;
         }
 
-        /* На мобильных экранах панель открывается снизу на весь экран */
         @media (max-width: 600px) {
             .side-panel {
                 top: auto;
@@ -276,6 +275,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // Прокси для обхода блокировок изображений
         const getProxyImg = (url) => `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=500&h=350&fit=cover`;
 
         const points = [
@@ -464,11 +464,11 @@
                     
                     <div class="photo-comparison">
                         <div class="photo-box">
-                            <img src="${point.imgOld}" alt="Архивное фото" onerror="this.src='https://via.placeholder.com/200x150?text=Архив+Алматы'">
+                            <img src="${point.imgOld}" alt="Архивное фото">
                             <span class="photo-label">Раньше</span>
                         </div>
                         <div class="photo-box">
-                            <img src="${point.imgNew}" alt="Современное фото" onerror="this.src='https://via.placeholder.com/200x150?text=Сейчас+Алматы'">
+                            <img src="${point.imgNew}" alt="Современное фото">
                             <span class="photo-label">Сейчас</span>
                         </div>
                     </div>
