@@ -27,7 +27,6 @@
             z-index: 1;
         }
 
-        /* Верхняя панель фильтров */
         .filter-bar {
             position: absolute;
             top: 20px;
@@ -68,7 +67,6 @@
             color: #fff;
         }
 
-        /* Маркеры карт */
         .custom-pin {
             display: flex;
             align-items: center;
@@ -89,7 +87,6 @@
             background: #0056b3;
         }
 
-        /* БОКОВАЯ ПАНЕЛЬ И АДАПТИВ ДЛЯ МОБИЛЬНЫХ */
         .side-panel {
             position: absolute;
             top: 80px;
@@ -275,9 +272,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Прокси для обхода блокировок изображений
-        const getProxyImg = (url) => `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=500&h=350&fit=cover`;
-
+        // Код подтянет локальные фото по именам файлов из вашей папки
         const points = [
             { 
                 id: 1, 
@@ -286,8 +281,8 @@
                 address: "Парк имени 28 гвардейцев-панфиловцев",
                 era: "верный", 
                 coords: [43.2588, 76.9531], 
-                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/6/6b/Verny_Cathedral_1910s.jpg"),
-                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/b/b3/Zenkov_Cathedral_Almaty.jpg"),
+                imgOld: "1old.jpg",
+                imgNew: "1new.jpg",
                 purpose: "Был построен как главный православный кафедральный собор города Верного.",
                 events: "Собор стал центром религиозной и архитектурной жизни города. Его деревянная конструкция проектировалась А. П. Зенковым с особым учётом сейсмичности региона.",
                 importance: "Это один из ключевых архитектурных символов дореволюционного Верного и уникальный памятник деревянного зодчества.",
@@ -301,8 +296,8 @@
                 address: "Улица Кабанбай батыра, 132",
                 era: "верный", 
                 coords: [43.2515, 76.9315], 
-                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/8/82/Verny_Officers_Assembly.jpg"),
-                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/a/a2/Museum_of_National_Musical_Instruments_Almaty.jpg"),
+                imgOld: "2old.jpg",
+                imgNew: "2new.jpg",
                 purpose: "Здание возводилось для размещения Верненского детского приюта и социальных служб города.",
                 events: "В конце XIX века здесь воспитывались и обучались дети-сироты. В советские и последующие годы назначение здания менялось, пока в нем не открылся городской музей.",
                 importance: "Выдающийся образец деревянного зодчества конца XIX века, спроектированный архитектором Павлом Гурдэ.",
@@ -316,8 +311,8 @@
                 address: "Перекрёсток улиц Жибек Жолы и Пушкина",
                 era: "верный", 
                 coords: [43.2641, 76.9548], 
-                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/1/1a/Gostiny_dvor_Verny.jpg"),
-                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/3/30/Green_Bazaar_Almaty.jpg"),
+                imgOld: "3old.jpg",
+                imgNew: "3new.jpg",
                 purpose: "Создавался как главный торговый и экономический узел города для местной торговли и приезжих купцов.",
                 events: "На протяжении полутора веков место эволюционировало от купеческих лавок и ярмарочных рядов до масштабного крытого базара в стиле советского модернизма.",
                 importance: "Главное торговое сердце города, отражающее колорит, культуру и экономику Алматы на всех этапах его развития.",
@@ -331,8 +326,8 @@
                 address: "Улица Рихарда Зорге, 1",
                 era: "xx", 
                 coords: [43.3412, 76.9485], 
-                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/e/e0/Turksib_1930.jpg"),
-                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/d/d4/Almaty_1_train_station.jpg"),
+                imgOld: "4old.jpg",
+                imgNew: "4new.jpg",
                 purpose: "Строилась как ключевой транспортный узел легендарной магистрали Турксиб (Туркестано-Сибирская железная дорога).",
                 events: "Прибытие первого поезда соединило изолированный регион с железными дорогами всей страны, вызвав демографический и экономический бум.",
                 importance: "Связующее звено, которое превратило провинциальный город в крупнейший промышленный и транспортный центр.",
@@ -346,8 +341,8 @@
                 address: "Квадрат улиц Гоголя, Зенкова, Казыбек би, Кунаева",
                 era: "ссср", 
                 coords: [43.2592, 76.9542], 
-                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/9/91/Panfilov_Park_History.jpg"),
-                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/8/87/Panfilov_Park_Almaty_Memorial.jpg"),
+                imgOld: "5old.jpg",
+                imgNew: "5new.jpg",
                 purpose: "Первоначально — городской сад; позже — главный мемориальный комплекс в память о героях Великой Отечественной войны.",
                 events: "Парк менял названия (Старокладбищенский, Пушкинский) и постепенно сформировался как главное мемориальное пространство города с Вечным огнем.",
                 importance: "Эпицентр военной памяти города, связанный с подвигом 316-й стрелковой дивизии, сформированной в Алма-Ате и Фрунзе.",
@@ -361,8 +356,8 @@
                 address: "Пересечение проспекта Достык и проспекта Абая",
                 era: "ссср", 
                 coords: [43.2435, 76.9582], 
-                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/4/4e/Palace_of_Lenin_Almaty_1970s.jpg"),
-                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/3/3d/Palace_of_the_Republic_Almaty.jpg"),
+                imgOld: "6old.jpg",
+                imgNew: "6new.jpg",
                 purpose: "Построен как Дворец культуры имени В. И. Ленина для проведения масштабных концертов, съездов и государственных мероприятий.",
                 events: "Здание стало главной концертной площадкой Казахстана и важным элементом архитектурного ансамбля площади Абая.",
                 importance: "Яркий и выдающийся памятник советского модернизма в архитектуре Средней Азии.",
@@ -376,8 +371,8 @@
                 address: "Урочище Медеу, ул. Керей-Жанибек хандар, 465",
                 era: "ссср", 
                 coords: [43.1575, 77.0588], 
-                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/d/d7/Medeu_1970s_construction.jpg"),
-                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/8/81/Medeu_skating_rink.jpg"),
+                imgOld: "7old.jpg",
+                imgNew: "7new.jpg",
                 purpose: "Для проведения тренировок и международных соревнований по конькобежному спорту на большой высоте.",
                 events: "Каток стал ледовой ареной мирового уровня, где было установлено свыше 200 мировых рекордов.",
                 importance: "Главный спортивный бренд Алматы и уникальный инженерный объект, вписанный в горный ландшафт Заилийского Алатау.",
@@ -391,8 +386,8 @@
                 address: "Пересечение проспекта Достык, ул. Сатпаева и пр. Назарбаева",
                 era: "ссср", 
                 coords: [43.2383, 76.9455], 
-                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/c/c5/Brezhnev_Square_Almaty_1980s.jpg"),
-                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/7/78/Republic_Square_Almaty.jpg"),
+                imgOld: "8old.jpg",
+                imgNew: "8new.jpg",
                 purpose: "Проектировалась как Новая площадь для проведения главных государственных парадов, демонстраций и торжеств.",
                 events: "Площадь стала местом судьбоносных Декабрьских событий 1986 года (Желтоксан), а также объявления Независимости Казахстана в 1991 году.",
                 importance: "Главная общественно-политическая арена новейшей истории страны.",
@@ -406,8 +401,8 @@
                 address: "Центр Площади Республики",
                 era: "независимость", 
                 coords: [43.2388, 76.9458], 
-                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/3/36/Construction_Monument_Independence_Almaty.jpg"),
-                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/f/f3/Independence_Monument_Almaty.jpg"),
+                imgOld: "9old.jpg",
+                imgNew: "9new.jpg",
                 purpose: "Возведен в честь 5-летия Независимости Республики Казахстан по инициативе Н. А. Назарбаева.",
                 events: "Стал центральной доминантой площади и символом новой государственной идентичности.",
                 importance: "Художественный и исторический комплекс, отображающий главные этапы казахской государственности.",
@@ -421,8 +416,8 @@
                 address: "Улица Жибек Жолы (от Абылай хана до Назарбаева)",
                 era: "независимость", 
                 coords: [43.2621, 76.9423], 
-                imgOld: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/6/67/Gorky_Street_Verny.jpg"),
-                imgNew: getProxyImg("https://upload.wikimedia.org/wikipedia/commons/9/91/Arbat_Almaty_street.jpg"),
+                imgOld: "10old.jpg",
+                imgNew: "10new.jpg",
                 purpose: "Создавалась как первая пешеходная и культурно-рекреационная артерия исторического центра.",
                 events: "Бывшая Торговая улица трансформировалась в открытое арт-пространство для художников, музыкантов, ремесленников и горожан.",
                 importance: "Главный показатель качества современной городской среды и центр уличной культуры Алматы.",
