@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Алматы: Город, который помнит</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #e5e3df;
+        }
+
+        #map {
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        /* Верхняя панель фильтров */
+        .filter-bar {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 16px;
+            border-radius: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: flex;
+            gap: 8px;
+            backdrop-filter: blur(5px);
+        }
+
+        .filter-btn {
+            border: none;
+            background: transparent;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn:hover {
+            background: #f0f0f0;
+            color: #111;
+        }
+
+        .filter-btn.active {
+            background: #007bff;
+            color: #fff;
+        }
+
+        /* Маркеры карт */
+        .custom-pin {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #007bff;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .custom-pin:hover {
+            transform: scale(1.2);
+            background: #0056b3;
+        }
+
+        /* УВЕЛИЧЕННАЯ БОКОВАЯ ПАНЕЛЬ СЛЕВА */
+        .side-panel {
+            position: absolute;
+            top: 80px;
+            left: 20px;
+            width: 420px;
+            max-height: calc(100vh - 100px);
+            background: rgba(255, 255, 255, 0.98);
+            z-index: 1000;
+            border-radius: 18px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+            padding: 20px;
+            overflow-y: auto;
+            display: none;
+            backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+        }
+
+        .side-panel.active {
+            display: block;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            background: #e9ecef;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 16px;
+            font-weight: bold;
+            color: #495057;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: #dee2e6;
+            color: #000;
+        }
+
+        .popup-title {
+            font-size: 19px;
+            font-weight: 800;
+            color: #111;
+            margin-bottom: 4px;
+            padding-right: 30px;
+            line-height: 1.3;
+        }
+
+        .popup-meta {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+            align-items: center;
+        }
+
+        .popup-year {
+            font-size: 11px;
+            font-weight: 700;
+            background: #007bff;
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 12px;
+        }
+
+        .popup-address {
+            font-size: 11px;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        /* Увеличенный блок сравнения фото */
+        .photo-comparison {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .photo-box {
+            flex: 1;
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #e0e0e0;
+            height: 150px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+
+        .photo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .photo-label {
+            position: absolute;
+            bottom: 6px;
+            left: 6px;
+            background: rgba(0, 0, 0, 0.75);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Детальные информационные секции */
+        .popup-section {
+            font-size: 13px;
+            color: #2b2b2b;
+            margin-top: 10px;
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 10px;
+            border-left: 4px solid #007bff;
+            line-height: 1.5;
+        }
+
+        .popup-section strong {
+            color: #007bff;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .popup-fact {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            color: #856404;
+        }
+
+        .popup-fact strong {
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterEra('all')">Все</button>
+        <button class="filter-btn" onclick="filterEra('верный')">🏘️ Верный</button>
+        <button class="filter-btn" onclick="filterEra('xx')">🚂 Нач. XX в.</button>
+        <button class="filter-btn" onclick="filterEra('ссср')">☭ СССР</button>
+        <button class="filter-btn" onclick="filterEra('независимость')">🇰🇿 Независимость</button>
+    </div>
+
+    <div id="sidePanel" class="side-panel">
+        <button class="close-btn" onclick="closePanel()">✕</button>
+        <div id="panelContent"></div>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Данные точек с точными прямыми фото-архивами объектов Алматы
+        const points = [
+            { 
+                id: 1, 
+                name: "Вознесенский кафедральный собор", 
+                year: "1907 г.", 
+                address: "Парк им. 28 панфиловцев",
+                era: "верный", 
+                coords: [43.2588, 76.9531], 
+                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Verny_Cathedral_1910s.jpg/800px-Verny_Cathedral_1910s.jpg",
+                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Zenkov_Cathedral_Almaty.jpg/800px-Zenkov_Cathedral_Almaty.jpg",
+                context: "Шедевр деревянного зодчества высотой 56 метров, построенный инженером А. П. Зенковым полностью из дерева без металлических гвоздей. Конструкция обладает уникальной гибкостью.", 
+                fact: "В 1911 году во время катастрофического 10-балльного землетрясения собор выстоял, потеряв только крест с колокольни.",
+                source: "Государственный архив г. Алматы / Архитектурный реестр.", 
+                summary: "Главный архитектурный символ крепости и сейсмостойкости дореволюционного Верного." 
+            },
+            { 
+                id: 2, 
+                name: "Музей народных музыкальных инструментов", 
+                year: "1892 г.", 
+                address: "ул. Зенкова, 24",
+                era: "верный", 
+                coords: [43.2515, 76.9562], 
+                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Verny_Officers_Assembly.jpg/800px-Verny_Officers_Assembly.jpg",
+                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Museum_of_National_Musical_Instruments_Almaty.jpg/800px-Museum_of_National_Musical_Instruments_Almaty.jpg",
+                context: "Здание бывшего Офицерского собрания города Верного. Возведено в «ропетовском» стиле из тянь-шанской ели с изящными деревянными резными наличниками.", 
+                fact: "Сегодня здесь хранится более 1000 редких музыкальных инструментов, включая домбры Абая и Жамбыла.",
+                source: "Историко-архитектурный атлас Верного.", 
+                summary: "Уникальный памятник деревянной застройки конца XIX века и центр культурного наследия." 
+            },
+            { 
+                id: 3, 
+                name: "Зелёный базар (Гостиный двор)", 
+                year: "1875 г.", 
+                address: "ул. Жибек Жолы, 53",
+                era: "верный", 
+                coords: [43.2641, 76.9548], 
+                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Gostiny_dvor_Verny.jpg/800px-Gostiny_dvor_Verny.jpg",
+                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Green_Bazaar_Almaty.jpg/800px-Green_Bazaar_Almaty.jpg",
+                context: "Собрание купеческих лавок и торговых рядов. В 1970-х годах комплекс полностью перестроили в стиле советского брутализма с крытыми павильонами.", 
+                fact: "На этом месте непрерывно ведется торговля уже более 150 лет.",
+                source: "Купеческие гильдейские книги Верненского уезда.", 
+                summary: "Историческое и экономическое «сердце» города со времён Великого Шелкового пути." 
+            },
+            { 
+                id: 4, 
+                name: "Станция Алматы-1", 
+                year: "1927 г.", 
+                address: "ул. Станционная, 1",
+                era: "xx", 
+                coords: [43.3412, 76.9485], 
+                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Turksib_1930.jpg/800px-Turksib_1930.jpg",
+                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Almaty_1_train_station.jpg/800px-Almaty_1_train_station.jpg",
+                context: "Строительство Туркестано-Сибирской магистрали (Турксиб) связало Казахстан с общесоюзной транспортной сетью и ускорило индустриализацию.", 
+                fact: "Именно благодаря прокладке Турксиба было принято решение перенести столицу КазССР из Кызылорды в Алма-Ату.",
+                source: "Летопись Турксиба (1927–1931 гг.).", 
+                summary: "Градообразующий объект, превративший провинциальный город в крупнейший мегаполис." 
+            },
+            { 
+                id: 5, 
+                name: "Парк имени 28 героев-панфиловцев", 
+                year: "1975 г.", 
+                address: "Центральный мемориальный парк",
+                era: "ссср", 
+                coords: [43.2592, 76.9542], 
+                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Panfilov_Park_History.jpg/800px-Panfilov_Park_History.jpg",
+                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Panfilov_Park_Almaty_Memorial.jpg/800px-Panfilov_Park_Almaty_Memorial.jpg",
+                context: "Первоначально Пушкинский сад. В 1975 году к 30-летию Победы воздвигнут величественный Мемориал Славы с Вечным огнем и бронзовым барельефом.", 
+                fact: "Парк содержит деревья, посаженные руками известных исторических личностей XX века.",
+                source: "Военно-исторический архив Министерства обороны.", 
+                summary: "Главный мемориальный комплекс и святилище памяти героев Великой Отечественной войны." 
+            },
+            { 
+                id: 6, 
+                name: "Дворец Республики", 
+                year: "1970 г.", 
+                address: "пр. Достык, 56",
+                era: "ссср", 
+                coords: [43.2435, 76.9582], 
+                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Palace_of_Lenin_Almaty_1970s.jpg/800px-Palace_of_Lenin_Almaty_1970s.jpg",
+                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Palace_of_the_Republic_Almaty.jpg/800px-Palace_of_the_Republic_Almaty.jpg",
+                context: "Здание Дворца культуры им. В. И. Ленина. Шедевр советского модернизма с мощными консольными свесами и эффектной «парящей» кровлей.", 
+                fact: "Архитекторы здания получили Государственную премию СССР за новаторский сейсмостойкий проект.",
+                source: "Сборник «Архитектура Советского Казахстана».", 
+                summary: "Главный культурно-концертный зал и визитная карточка советского архитектурного ансамбля." 
+            },
+            { 
+                id: 7, 
+                name: "Высокогорный каток Медеу", 
+                year: "1972 г.", 
+                address: "урочище Медеу, 465",
+                era: "ссср", 
+                coords: [43.1575, 77.0588], 
+                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Medeu_1970s_construction.jpg/800px-Medeu_1970s_construction.jpg",
+                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Medeu_skating_rink.jpg/800px-Medeu_skating_rink.jpg",
+                context: "Крупнейший высокогорный спортивный комплекс в мире на высоте 1691 м над уровнем моря. Ледовое поле площадью 10,5 тыс. кв. м.", 
+                fact: "Из-за уникального разряженного воздуха и чистейшей горной воды на ледовом овале Медеу было установлено свыше 200 мировых рекордов.",
+                source: "Летопись мирового конькобежного спорта.", 
+                summary: "Легендарная «фабрика рекордов» и всемирно известный спортивный бренд страны." 
+            },
+            { 
+                id: 8, 
+                name: "Площадь Республики", 
+                year: "1980 г.", 
+                address: "пр. Достык / ул. Сатпаева",
+                era: "ссср", 
+                coords: [43.2383, 76.9455], 
+                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Brezhnev_Square_Almaty_1980s.jpg/800px-Brezhnev_Square_Almaty_1980s.jpg",
+                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Republic_Square_Almaty.jpg/800px-Republic_Square_Almaty.jpg",
+                context: "Создана как новая административная площадь столицы. Здесь находился Дом Правительства и ключевые министерства КазССР.", 
+                fact: "Площадь стала эпицентром трагических и судьбоносных событий Декабря 1986 года (Желтоксан).",
+                source: "Хроники новейшей истории Казахстана.", 
+                summary: "Главная общественно-политическая арена, где формировалось стремление к независимости." 
+            },
+            { 
+                id: 9, 
+                name: "Монумент Независимости", 
+                year: "1996 г.", 
+                address: "Площадь Республики",
+                era: "независимость", 
+                coords: [43.2388, 76.9458], 
+                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Construction_Monument_Independence_Almaty.jpg/800px-Construction_Monument_Independence_Almaty.jpg",
+                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Independence_Monument_Almaty.jpg/800px-Independence_Monument_Almaty.jpg",
+                context: "Стела высотой 28 метров, увенчанная фигурой «Золотого человека», стоящего на крылатом барсе. Автор скульптурного комплекса — Шота Валиханов.", 
+                fact: "У подножия стелы находится отпечаток ладони и книга с присягой, а барельефы описывают историю от Сакской эпохи до Независимости.",
+                source: "Государственный реестр памятников суверенного Казахстана.", 
+                summary: "Главный символ государственности, свободы и непрерывности истории страны." 
+            },
+            { 
+                id: 10, 
+                name: "Пешеходная улица Арбат (Жибек Жолы)", 
+                year: "Наши дни", 
+                address: "ул. Жибек Жолы (от Назарбаева до Абылай хана)",
+                era: "независимость", 
+                coords: [43.2621, 76.9423], 
+                imgOld: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Gorky_Street_Verny.jpg/800px-Gorky_Street_Verny.jpg",
+                imgNew: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Arbat_Almaty_street.jpg/800px-Arbat_Almaty_street.jpg",
+                context: "Бывшая улица Торговая и Горького. После масштабной реконструкции преобразована в пешеходный бульвар для прогулок и творчества.", 
+                fact: "Здесь выставляют свои работы художники, выступают музыканты и проводятся городские арт-фестивали.",
+                source: "Мастер-план урбанистического развития Алматы.", 
+                summary: "Главное креативное и пешеходное пространство современного Алматы." 
+            }
+        ];
+
+        // Инициализация карты
+        const map = L.map('map', { zoomControl: false }).setView([43.25, 76.95], 12);
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 18,
+            attribution: 'Tiles &copy; Esri'
+        }).addTo(map);
+
+        let markers = [];
+
+        points.forEach(point => {
+            const icon = L.divIcon({
+                className: 'custom-pin',
+                html: point.id,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            });
+
+            const marker = L.marker(point.coords, { icon: icon }).addTo(map);
+            marker.era = point.era;
+
+            // Клик по точке -> плавная центровка и вызов большой панели
+            marker.on('click', function() {
+                map.flyTo(point.coords, 15, { animate: true, duration: 1.2 });
+
+                const content = `
+                    <div class="popup-title">${point.id}. ${point.name}</div>
+                    <div class="popup-meta">
+                        <span class="popup-year">${point.year}</span>
+                        <span class="popup-address">📍 ${point.address}</span>
+                    </div>
+                    
+                    <div class="photo-comparison">
+                        <div class="photo-box">
+                            <img src="${point.imgOld}" alt="Архивное фото" onerror="this.src='https://via.placeholder.com/200x150?text=Архив+Алматы'">
+                            <span class="photo-label">Раньше</span>
+                        </div>
+                        <div class="photo-box">
+                            <img src="${point.imgNew}" alt="Современное фото" onerror="this.src='https://via.placeholder.com/200x150?text=Фото+Алматы'">
+                            <span class="photo-label">Сейчас</span>
+                        </div>
+                    </div>
+
+                    <div class="popup-section">
+                        <strong>Исторический контекст и архитектура:</strong>
+                        ${point.context}
+                    </div>
+
+                    <div class="popup-section popup-fact">
+                        <strong>Интересный факт:</strong>
+                        ${point.fact}
+                    </div>
+
+                    <div class="popup-section">
+                        <strong>Источник данных:</strong>
+                        ${point.source}
+                    </div>
+
+                    <div class="popup-section">
+                        <strong>Исторический вывод:</strong>
+                        ${point.summary}
+                    </div>
+                `;
+
+                document.getElementById('panelContent').innerHTML = content;
+                document.getElementById('sidePanel').classList.add('active');
+            });
+
+            markers.push(marker);
+        });
+
+        function closePanel() {
+            document.getElementById('sidePanel').classList.remove('active');
+        }
+
+        function filterEra(era) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            markers.forEach(marker => {
+                if (era === 'all' || marker.era === era) {
+                    map.addLayer(marker);
+                } else {
+                    map.removeLayer(marker);
+                }
+            });
+            closePanel();
+        }
+    </script>
+</body>
+</html>
